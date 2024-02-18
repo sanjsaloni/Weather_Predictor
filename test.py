@@ -1,2 +1,0 @@
-print("sanjana\
-      \nsaloni")
