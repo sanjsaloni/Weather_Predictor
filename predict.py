@@ -1,19 +1,15 @@
 import requests
 import json
 
-base_url = "http://api.weatherapi.com/v1"
-key = "7aa90a91f1f44ce2853170509241802"
-weather = (input("Enter the weather you need: ")).lower()
-city = input("Enter the city: ")
-
-def air_quality():
+def air_quality(url):
     a_url = url+"&aqi=yes"
     response = requests.get(a_url)
     a_data = response.json()
     air_q = a_data["current"]["air_quality"]
     print(f"co: {air_q['co']}\nno2: {air_q['no2']}\no3: {air_q['o3']}\nso2: {air_q['so2']}")
 
-if 'current' in weather:
+
+def current():
     current_url = f"/current.json?key={key}&q={city}"
     url = base_url+current_url
     response = requests.get(url)
@@ -82,19 +78,32 @@ if 'current' in weather:
                 # break
             elif 7 == choice:
                 # print(a_url)
-                air_quality()
+                air_quality(url)
             elif 8 == choice:
                 print("Code exited.")
                 break
                 
-if 'forecast' in weather:
+def forecast():
     days = int(input("Number of days: "))
     alerts = input("Do you want the alerts? (Yes/No)").lower()
     aqi_ = input("Do you want the air quality? (Yes/No)").lower()
     f_url = base_url + f"/forecast.json?key={key}&q={city}&days={days}&aqi={aqi_}&alerts={alerts}"
     print("Enter your choice")
+    # current()
+    astronomy()
+    response = requests.get(f_url)
+    if response.status_code == 200:
+        data = response.json()
+        value = data['forecast']['forecastday'][0]
+        print(f"Maximum Temperature:{value['day']['maxtemp_c']}°C\nMaximum Temperature:{value['day']['maxtemp_f']}°F")
+        print(f"Minimum temperature:{value['day']['mintemp_c']}°C\nMinimum Temperature:{value['day']['mintemp_f']}°F")
+        print(f"Average temperature:{value['day']['avgtemp_c']}°C\nAverage Temperature:{value['day']['avgtemp_f']}°F")
+        print(f"Maximum wind:{value['day']['maxwind_mph']} mph\nMaximum wind:{value['day']['maxwind_kph']} kph")
+        print(f"Condition:{value['day']['condition']['text']}")
+        print(f"Total precipitation: {value['day']['totalprecip_in']}")
 
-if 'astronomy' in weather:
+
+def astronomy():
     date = input("Enter the date(DD/MM/YY): ")
     astro_url = base_url+f"/astronomy.json?key={key}&q={city}&dt={date}"
     response = requests.get(astro_url)
@@ -104,3 +113,27 @@ if 'astronomy' in weather:
         print(f"Sunrise: {value['sunrise']}\nSunset: {value['sunset']}\nMoonrise: {value['moonrise']}\
               \nMoon Set: {value['moonset']}\nMoon Phase: {value['moon_phase']}\nMoon Illumination: {value['moon_illumination']}\
               \nMoon Illuminaton: {value['moon_illumination']}")
+
+
+def future():
+    date = input("Enter the date (Date between 14 days and 300 days from today in the future in yyyy-MM-dd format): ")  
+    url = f"http://api.weatherapi.com/v1/future.json?key={key}&q={city}&dt={date}"
+    response = requests.get(url)
+    if(response.status_code==200):
+        data = response.json()
+        f_day = data["forecast"]["forecastday"]
+        astronomy(date) #function for astro information of the weather.
+        forecast(date) #function to be implemented for the information of the weather
+
+if __name__ in "__main__":
+    base_url = "http://api.weatherapi.com/v1"
+    key = "7aa90a91f1f44ce2853170509241802"
+    weather = (input("Enter the weather you need: ")).lower()
+    city = input("Enter the city: ")
+
+    if 'current' in weather:
+        current()
+    if 'astronomy' in weather:
+        astronomy()
+    if 'forecast' in weather:
+        forecast()
