@@ -1,5 +1,6 @@
 import requests
-import json
+import os
+from dotenv import load_dotenv
 
 def air_quality(url):
     a_url = url+"&aqi=yes"
@@ -8,11 +9,31 @@ def air_quality(url):
     air_q = a_data["current"]["air_quality"]
     print(f"co: {air_q['co']}\nno2: {air_q['no2']}\no3: {air_q['o3']}\nso2: {air_q['so2']}")
 
+def wind(wind_dir):
+                fi=""
+                if 'S' in wind_dir:
+                    fi=("South")
+                elif 'N' in wind_dir:
+                    fi=("North")
+                elif 'E' in wind_dir:
+                    fi=("East")
+                elif 'W' in wind_dir:
+                    fi=("West")
+                elif 'SSW' in wind_dir:
+                    fi=("SouthWest")
+                elif 'SSE' in wind_dir:
+                    fi=("SouthEast")
+                elif 'NNW' in wind_dir:
+                    fi="NorthWest"
+                elif 'NNE' in wind_dir:
+                    fi=("NorthEast")
+                return fi
 
 def current():
     current_url = f"/current.json?key={key}&q={city}"
     url = base_url+current_url
     response = requests.get(url)
+
     if response.status_code == 200:
         data = response.json()
         print(f"What do you want to know?\
@@ -26,7 +47,7 @@ def current():
                 \n 8.Stop the query")
         
         while(True):
-         choice = int(input("Enter your choice(1-6): "))
+         choice = int(input("Enter your choice(1-8): "))
          if(choice<=8 and choice>0):
             if 1 == choice:
                 temp_c = data["current"]["temp_c"]
@@ -48,23 +69,8 @@ def current():
                 print(f"Wind speed at {city} : {wind_mph} mph")
                 # break
             elif 4 == choice:
-                wind_dir = data["current"]["wind_dir"]
-                if 'S' in wind_dir:
-                    print("South")
-                elif 'N' in wind_dir:
-                    print("North")
-                elif 'E' in wind_dir:
-                    print("East")
-                elif 'W' in wind_dir:
-                    print("West")
-                elif 'SSW' in wind_dir:
-                    print("SouthWest")
-                elif 'SSE' in wind_dir:
-                    print("SouthEast")
-                elif 'NNW' in wind_dir:
-                    print("NorthWest")
-                elif 'NNE' in wind_dir:
-                    print("NorthEast")
+                wind_d = wind(data["current"]["wind_dir"])
+                print("Wind Direction: "+wind_d)
                 # print(f"Wind direction: {wind_dir}")
                 # break
             elif 5 == choice:
@@ -84,13 +90,12 @@ def current():
                 break
                 
 def forecast():
-    days = int(input("Number of days: "))
-    alerts = input("Do you want the alerts? (Yes/No)").lower()
-    aqi_ = input("Do you want the air quality? (Yes/No)").lower()
+    days = int(input("Number of days(maximum 10 days): "))
+    alerts = input("Do you want the alerts?(Yes/No): ").lower()
+    aqi_ = input("Do you want the air quality?(Yes/No): ").lower()
     f_url = base_url + f"/forecast.json?key={key}&q={city}&days={days}&aqi={aqi_}&alerts={alerts}"
-    print("Enter your choice")
     # current()
-    astronomy()
+    # astronomy()
     response = requests.get(f_url)
     if response.status_code == 200:
         data = response.json()
@@ -101,6 +106,12 @@ def forecast():
         print(f"Maximum wind:{value['day']['maxwind_mph']} mph\nMaximum wind:{value['day']['maxwind_kph']} kph")
         print(f"Condition:{value['day']['condition']['text']}")
         print(f"Total precipitation: {value['day']['totalprecip_in']}")
+        value_hour = data['forecast']['forecastday'][0]['hour']
+        length = len(value_hour)
+        # print(length)
+        for i in range(0,length):
+            value_hour = data['forecast']['forecastday'][0]['hour'][i]
+            print(f"Time:{value_hour['time']}\nTemperature: {value_hour['temp_c']}\nWind direction:{wind(value_hour['wind_dir'])}\n")
 
 
 def astronomy():
@@ -126,11 +137,12 @@ def future():
         forecast(date) #function to be implemented for the information of the weather
 
 if __name__ in "__main__":
+    load_dotenv()
     base_url = "http://api.weatherapi.com/v1"
-    key = "7aa90a91f1f44ce2853170509241802"
+    key = os.environ['key']
     weather = (input("Enter the weather you need: ")).lower()
     city = input("Enter the city: ")
-
+    
     if 'current' in weather:
         current()
     if 'astronomy' in weather:
