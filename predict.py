@@ -9,6 +9,7 @@ def air_quality(url):
     air_q = a_data["current"]["air_quality"]
     print(f"co: {air_q['co']}\nno2: {air_q['no2']}\no3: {air_q['o3']}\nso2: {air_q['so2']}")
 
+
 def wind(wind_dir):
                 fi=""
                 if 'S' in wind_dir:
@@ -28,6 +29,7 @@ def wind(wind_dir):
                 elif 'NNE' in wind_dir:
                     fi=("NorthEast")
                 return fi
+
 
 def current():
     current_url = f"/current.json?key={key}&q={city}"
@@ -88,14 +90,18 @@ def current():
             elif 8 == choice:
                 print("Code exited.")
                 break
-                
+    else:
+        data = response.json()
+        print(data['error']['message'])
+
+
 def forecast():
     days = int(input("Number of days(maximum 10 days): "))
     alerts = input("Do you want the alerts?(Yes/No): ").lower()
     aqi_ = input("Do you want the air quality?(Yes/No): ").lower()
     f_url = base_url + f"/forecast.json?key={key}&q={city}&days={days}&aqi={aqi_}&alerts={alerts}"
-    # current()
-    # astronomy()
+    current()
+    astronomy()
     response = requests.get(f_url)
     if response.status_code == 200:
         data = response.json()
@@ -105,13 +111,15 @@ def forecast():
         print(f"Average temperature:{value['day']['avgtemp_c']}°C\nAverage Temperature:{value['day']['avgtemp_f']}°F")
         print(f"Maximum wind:{value['day']['maxwind_mph']} mph\nMaximum wind:{value['day']['maxwind_kph']} kph")
         print(f"Condition:{value['day']['condition']['text']}")
-        print(f"Total precipitation: {value['day']['totalprecip_in']}")
+        print(f"Total precipitation: {value['day']['totalprecip_in']}\n")
         value_hour = data['forecast']['forecastday'][0]['hour']
         length = len(value_hour)
-        # print(length)
-        for i in range(0,length):
-            value_hour = data['forecast']['forecastday'][0]['hour'][i]
-            print(f"Time:{value_hour['time']}\nTemperature: {value_hour['temp_c']}\nWind direction:{wind(value_hour['wind_dir'])}\n")
+        for j in range(0,days):
+          for i in range(0,length):
+            value_hour = data['forecast']['forecastday'][j]['hour'][i]
+            print(f"Time:{value_hour['time']}\nTemperature: {value_hour['temp_c']}\nWind direction:{wind(value_hour['wind_dir'])}\nWind Speed:{value_hour['wind_mph']}\nPressure:{value_hour['pressure_mb']}\
+                  \nPrecipitation:{value_hour['precip_mm']}\nHumidity:{value_hour['humidity']}\nFeels like:{value_hour['feelslike_c']}\n")
+            # print(len(value_hour))
 
 
 def astronomy():
