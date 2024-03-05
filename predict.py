@@ -112,6 +112,7 @@ def forecast():
         print(f"Maximum wind:{value['day']['maxwind_mph']} mph\nMaximum wind:{value['day']['maxwind_kph']} kph")
         print(f"Condition:{value['day']['condition']['text']}")
         print(f"Total precipitation: {value['day']['totalprecip_in']}\n")
+        print(f"Humidity: {value['day']['avghumidity']}")
         value_hour = data['forecast']['forecastday'][0]['hour']
         length = len(value_hour)
         for j in range(0,days):
