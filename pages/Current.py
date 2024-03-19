@@ -1,21 +1,63 @@
 import streamlit as st
 import requests
 import os
-import sys
+# import sys
 # sys.path.append('../../')
 # import main.predict as pd 
-import predict as pd
+# import predict as pd
+# sys.path.insert(0, "Users\Sanjay Sahoo\A_projects\Weather_Prediction")
+# from predict import wind
 st.set_page_config(page_icon = ":cloud:",page_title = "Current Weather")
 st.markdown("# Weather Today")
-st.sidebar.header("")
-city = st.text_input(":round_pushpin: Enter the city")
+st.sidebar.markdown("# Current")
+
+def air_quality(url):
+    a_url = url+"&aqi=yes"
+    response = requests.get(a_url)
+    a_data = response.json()
+    air_q = a_data["current"]["air_quality"]
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+         st.write("Carbon Monoxide")
+         st.write(f"{air_q['co']}")
+    with col2:
+         st.write("Nitrogen Dioxide")
+         st.write(f"{air_q['no2']}")
+    with col3:
+         st.write('Nitrate ')
+         st.write(f"{air_q['o3']}")
+    with col4:
+         st.write("Suplur Dioxide")
+         st.write(f"{air_q['so2']}")
+
+def wind(wind_dir):
+                fi=""
+                if 'S' in wind_dir:
+                    fi=("South")
+                elif 'N' in wind_dir:
+                    fi=("North")
+                elif 'E' in wind_dir:
+                    fi=("East")
+                elif 'W' in wind_dir:
+                    fi=("West")
+                elif 'SSW' in wind_dir:
+                    fi=("SouthWest")
+                elif 'SSE' in wind_dir:
+                    fi=("SouthEast")
+                elif 'NNW' in wind_dir:
+                    fi="NorthWest"
+                elif 'NNE' in wind_dir:
+                    fi=("NorthEast")
+                return fi
+if __name__ in "__main__":
+ city = st.text_input(":round_pushpin: Enter the city")
 # pre = st.button("")
-base_url = os.environ['base_url']
-key = os.environ['key']
-current_url = f"/current.json?key={key}&q={city}"
-url = base_url+current_url
-response = requests.get(url)
-if response.status_code == 200:
+ base_url = os.environ['base_url']
+ key = os.environ['key']
+ current_url = f"/current.json?key={key}&q={city}"
+ url = base_url+current_url
+ response = requests.get(url)
+ if response.status_code == 200:
         data = response.json()
         # '''st.write(f"What do you want to know?\
         #       \n 1.Current Temperature of {city}\
@@ -58,7 +100,7 @@ if response.status_code == 200:
                 # break
         if a4:
                 # pd.wind()
-                wind_d = pd.wind(data["current"]["wind_dir"])
+                wind_d = wind(data["current"]["wind_dir"])
                 st.write("Wind Direction: "+ wind_d)
                 # print(f"Wind direction: {wind_dir}")
                 # break
@@ -73,10 +115,11 @@ if response.status_code == 200:
                 # break
         if a7:
                 # print(a_url)
-                pd.air_quality(url)
+                air_quality(url)
         # elif a8:
-                print("Code exited.")
+                # print("Code exited.")
             # break
-else:
+ else:
         data = response.json()
         # st.write("Please enter the city")
+
